@@ -677,9 +677,11 @@ function renderExpiry() {
           <span class="badge ${cls}">${daysText}</span>
         </div>
         <div class="card-meta">
+          <div class="meta-item">코드 <span>${d.code}</span></div>
           <div class="meta-item">유통기한 <span>${d.expDate}</span></div>
           <div class="meta-item">제조일 <span>${d.mfgDate || '-'}</span></div>
           <div class="meta-item">롯트번호 <span>${d.lotNo || '-'}</span></div>
+          <div class="meta-item">시험번호 <span>${d.testNo || '-'}</span></div>
           <div class="meta-item">사용비율 <span>${d.usageRate !== null ? d.usageRate + '%' : '-'}</span></div>
         </div>
       </div>`;
