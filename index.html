@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f172a">
 <title>srbiotek 원재료 관리</title>
-<link rel="manifest" href="#" />
+<link rel="manifest" href="#" /> <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script> <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
 
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -527,7 +527,7 @@ let currentFilter = 'all';
 window.onload = () => {
   if (!API_URL) {
     document.getElementById('modalOverlay').classList.remove('hidden');
-  } else {
+  
     loadData();
   }
 };
@@ -707,15 +707,16 @@ async function startCamera() {
     wrap.style.display = 'block';
     btn.style.display = 'none';
 
-    // ZXing 바코드 라이브러리 로드
-    if (!window.ZXing) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js';
-      script.onload = () => startDecoding(video);
-      document.head.appendChild(script);
-    } else {
-      startDecoding(video);
-    }
+    // ZXing 바코드 라이브러리 로드     
+   startDecoding(video);    
+    
+      
+      
+      
+      
+    
+      
+
   } catch(e) {
     alert('카메라 권한을 허용해주세요!\n설정 > 사이트 설정 > 카메라');
   }
