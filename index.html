@@ -7,7 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f172a">
 <title>srbiotek 원재료 관리</title>
-<link rel="manifest" href="#" /> <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
+<link rel="manifest" href="#" />
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -527,7 +528,7 @@ let currentFilter = 'all';
 window.onload = () => {
   if (!API_URL) {
     document.getElementById('modalOverlay').classList.remove('hidden');
-  
+  } else {
     loadData();
   }
 };
@@ -690,9 +691,7 @@ function renderExpiry() {
 }
 
 // ── 3번: 바코드 스캔 ──
-// ── 카메라 바코드 스캔 ──
 let cameraStream = null;
-let scanInterval = null;
 
 async function startCamera() {
   const wrap = document.getElementById('cameraWrap');
@@ -706,43 +705,34 @@ async function startCamera() {
     video.srcObject = cameraStream;
     wrap.style.display = 'block';
     btn.style.display = 'none';
-
-    // ZXing 바코드 라이브러리 로드     
-   startDecoding(video);    
-    
-      
-      
-      
-      
-    
-      
-
+    startDecoding(video);
   } catch(e) {
     alert('카메라 권한을 허용해주세요!\n설정 > 사이트 설정 > 카메라');
   }
 }
 
 function startDecoding(video) {
-  const codeReader = new ZXing.BrowserMultiFormatReader();
-  codeReader.decodeFromVideoElement(video, (result, err) => {
-    if (result) {
-      const code = result.getText();
-      stopCamera();
-      document.getElementById('scanInput').value = code;
+  const html5QrCode = new Html5Qrcode("cameraVideo");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 220, height: 120 } },
+    (decodedText) => {
+      html5QrCode.stop();
+      document.getElementById('scanInput').value = decodedText;
       doScan();
     }
-  });
-  window._codeReader = codeReader;
+  );
+  window._codeReader = html5QrCode;
 }
 
 function stopCamera() {
+  if (window._codeReader) {
+    window._codeReader.stop().catch(() => {});
+    window._codeReader = null;
+  }
   if (cameraStream) {
     cameraStream.getTracks().forEach(t => t.stop());
     cameraStream = null;
-  }
-  if (window._codeReader) {
-    window._codeReader.reset();
-    window._codeReader = null;
   }
   document.getElementById('cameraWrap').style.display = 'none';
   document.getElementById('cameraBtn').style.display = 'block';
