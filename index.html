@@ -705,13 +705,13 @@ async function startCamera() {
     video.srcObject = cameraStream;
     wrap.style.display = 'block';
     btn.style.display = 'none';
-    startDecoding(video);
+    startDecoding();
   } catch(e) {
     alert('카메라 권한을 허용해주세요!\n설정 > 사이트 설정 > 카메라');
   }
 }
 
-function startDecoding(video) {
+function startDecoding() {
   const html5QrCode = new Html5Qrcode("cameraVideo");
   html5QrCode.start(
     { facingMode: "environment" },
