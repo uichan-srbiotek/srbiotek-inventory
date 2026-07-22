@@ -202,6 +202,7 @@
     <div class="exp-section"><div class="section-title">⚠️ 3개월 이내</div><div class="mat-list" id="exp-3m"></div></div>
     <div class="exp-section"><div class="section-title">📌 6개월 이내</div><div class="mat-list" id="exp-6m"></div></div>
     <div class="exp-section"><div class="section-title">✅ 6개월 이상</div><div class="mat-list" id="exp-ok"></div></div>
+    <div class="exp-section"><div class="section-title">🗑️ 폐기 처리됨</div><div class="mat-list" id="exp-disposed"></div></div>
   </div>
 
   <!-- 바코드 스캔 패널 -->
@@ -276,7 +277,7 @@ async function loadData() {
   if (!API_URL) { document.getElementById('modalOverlay').classList.remove('hidden'); return; }
   document.getElementById('usageList').innerHTML = '<div class="loading"><div class="spinner"></div>데이터 불러오는 중...</div>';
   try {
-    const res = await fetch(`${API_URL}?action=getAll`);
+    const res = await fetch(`${API_URL}?action=getAll&showDisposed=true`);
     const json = await res.json();
     if (!json.success) throw new Error(json.error || '오류');
     allData = json.items;
@@ -334,7 +335,10 @@ function renderUsage() {
 }
 
 function renderExpiry() {
-  const sorted = [...allData].filter(d => d.expDate).sort((a,b) => (a.daysLeft??9999) - (b.daysLeft??9999));
+  const active = allData.filter(d => d.expDate && !d.isDisposed);
+  const disposed = allData.filter(d => d.expDate && d.isDisposed);
+
+  const sorted = [...active].sort((a,b) => (a.daysLeft??9999) - (b.daysLeft??9999));
   const critical = sorted.filter(d => d.daysLeft !== null && d.daysLeft <= 30);
   const m3 = sorted.filter(d => d.daysLeft !== null && d.daysLeft > 30 && d.daysLeft <= 90);
   const m6 = sorted.filter(d => d.daysLeft !== null && d.daysLeft > 90 && d.daysLeft <= 180);
@@ -357,9 +361,52 @@ function renderExpiry() {
           <div class="meta-item">시험번호 <span>${d.testNo || '-'}</span></div>
           <div class="meta-item">사용비율 <span>${d.usageRate !== null ? d.usageRate + '%' : '-'}</span></div>
         </div>
+        <button class="btn-secondary" style="margin-top:10px;width:100%" onclick="toggleDisposal('${d.sheetName}', ${d.row}, true, this)">🗑️ 숨기기(폐기 처리)</button>
       </div>`;
     }).join('');
   });
+
+  const dispEl = document.getElementById('exp-disposed');
+  if (!disposed.length) {
+    dispEl.innerHTML = '<div class="empty" style="padding:16px">해당 없음</div>';
+  } else {
+    dispEl.innerHTML = disposed.map(d => `
+    <div class="mat-card">
+      <div class="card-top"><div class="mat-name">${d.name}</div><span class="badge warning">${d.disposalLabel}</span></div>
+      <div class="card-meta">
+        <div class="meta-item">코드 <span>${d.code}</span></div>
+        <div class="meta-item">유통기한 <span>${d.expDate}</span></div>
+        <div class="meta-item">롯트번호 <span>${d.lotNo || '-'}</span></div>
+      </div>
+      <button class="btn-secondary" style="margin-top:10px;width:100%" onclick="toggleDisposal('${d.sheetName}', ${d.row}, false, this)">↩️ 복원(다시 보이기)</button>
+    </div>`).join('');
+  }
+}
+
+async function toggleDisposal(sheetName, row, dispose, btn) {
+  btn.disabled = true;
+  btn.textContent = '처리 중...';
+  let label = '';
+  if (dispose) {
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(2);
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    label = `${yy}년 ${mm}월폐기 품목`;
+  }
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: dispose ? 'setDisposal' : 'clearDisposal',
+        sheetName, row, label
+      })
+    });
+    await loadData();
+  } catch (e) {
+    alert('처리 중 오류: ' + e.message);
+    btn.disabled = false;
+  }
 }
 
 // ── 바코드/QR 스캔 ──
