@@ -233,17 +233,14 @@
 </div>
 
 <script>
-let API_URL = localStorage.getItem('srbiotek_api') || '';
+const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx4FKxVPPjEJGZJhm9OLuxmLCj-9uja6q22KP8Jp4oOeUSkIkeQVzY3pEF7hk4t7_g1/exec';
+let API_URL = localStorage.getItem('srbiotek_api') || DEFAULT_API_URL;
 let allData = [];
 let currentFilter = 'all';
 let html5QrCode = null;
 
 window.onload = () => {
-  if (!API_URL) {
-    document.getElementById('modalOverlay').classList.remove('hidden');
-  } else {
-    loadData();
-  }
+  loadData();
 };
 
 function closeModal() {
