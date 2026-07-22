@@ -190,6 +190,7 @@
       <button class="pill" onclick="setFilter('danger', this)">🔴 20% 미만</button>
       <button class="pill" onclick="setFilter('warning', this)">🟡 20~50%</button>
       <button class="pill" onclick="setFilter('ok', this)">🟢 50% 이상</button>
+      <button class="pill" onclick="setFilter('disposed', this)">🗑️ 폐기 처리됨</button>
     </div>
     <div class="mat-list" id="usageList">
       <div class="loading"><div class="spinner"></div>API 주소를 설정해주세요</div>
@@ -298,6 +299,7 @@ function renderUsage() {
     if (currentFilter === 'danger') return d.usageRate !== null && d.usageRate < 20;
     if (currentFilter === 'warning') return d.usageRate !== null && d.usageRate >= 20 && d.usageRate < 50;
     if (currentFilter === 'ok') return d.usageRate !== null && d.usageRate >= 50;
+    if (currentFilter === 'disposed') return d.isDisposed;
     return true;
   });
   filtered.sort((a, b) => (a.usageRate ?? 999) - (b.usageRate ?? 999));
