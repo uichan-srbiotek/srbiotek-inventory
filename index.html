@@ -318,7 +318,10 @@ function renderUsage() {
     const cardClass = isDanger ? 'low-usage' : '';
     return `
     <div class="mat-card ${cardClass}">
-      <div class="card-top"><div class="mat-name">${d.name}</div><span class="badge ${badgeClass}">${badgeText}</span></div>
+      <div class="card-top">
+        <div class="mat-name">${d.name}${d.isDisposed ? ` <span class="badge warning" style="margin-left:4px">🗑️ ${d.disposalLabel}</span>` : ''}</div>
+        <span class="badge ${badgeClass}">${badgeText}</span>
+      </div>
       <div class="card-meta">
         <div class="meta-item">코드 <span>${d.code}</span></div>
         <div class="meta-item">규격 <span>${d.spec || '-'}</span></div>
